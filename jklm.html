@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="syllable"></div>
+</body>
+
+    <script>
+        let SYL = document.querySelector(".syllable");
+        const alphabets = [
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 
+            'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 
+            'u', 'v', 'w', 'x', 'y', 'z'
+        ];
+
+  
+        let maxChars = Math.random()*2 + 1;
+        let syllable;
+        let randomChar
+
+        const randomSyllable = () => {
+
+            for(let i = 0; i < maxChars; i++) {
+                randomChar = Math.round(Math.random()*25);
+
+                if(i === 0) {
+                    syllable = alphabets[randomChar];
+                    continue;
+                }
+
+                syllable += alphabets[randomChar]
+            }
+
+            return syllable;
+            
+        }
+
+        // setInterval(() => SYL.innerHTML = randomSyllable(), 3000)
+        // let SYL = document.querySelector(".syllable");
+
+        window.addEventListener("keydown", () => SYL.innerHTML = randomSyllable())
+
+        let apiKey;
+        let endpoint;
+        let requestOptions;
+        let letters;
+
+    function Fetch (newLetters) {
+
+        apiKey = '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';
+        endpoint = 'https://api.groq.com/openai/v1/chat/completions';
+
+        requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization':`Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'llama3-8b-8192',
+                messages: [
+                { role: 'system', content: `you will be given a syllable you have to make a word and the letters of the syllable should come consequetively in the word. example 'io' would be 'lion' and not 'oil' 'foil'. the retrun answere shuold either be {word} or {notValid} no more words or text` },
+                { role: 'user', content: `make a word from this syllable ${newLetters}`}
+                ],
+                    max_tokens: 10
+            })
+        };
+
+        fetch(endpoint, requestOptions)
+        .then(response => response.json())
+        .then(data => console.log(
+           data.choices[0].message.content
+        //  data
+        ))
+        .catch(error => console.error('Error:', error));
+    }
+
+
+
+
+        const handleLetters = (newLetters) => {
+            console.log(newLetters, ":");
+            Fetch(newLetters);
+        };
+
+        const observer = new MutationObserver(() => {
+            letters = SYL.innerHTML;
+            handleLetters(letters); 
+        });
+
+        observer.observe(SYL, { childList: true, subtree: true });
+
+    </script>
+    
+</html>
